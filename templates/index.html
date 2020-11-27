@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>swoole聊天室</title>
+    <link rel="stylesheet" href="/assets/layui/css/layui.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <style type="text/css">
+        body{
+            background-image: url('/assets/image/login.jpg')
+        }
+        .login-main{
+            margin-top:50px;
+            width:1000px;
+            height:750px;
+            padding:50px;
+            background-color: #eaeaea;
+        }
+        .login-main header{
+            margin-top:0px;
+        }
+
+
+        .bottom{
+            /*background-color: black;*/
+            width:1000px;
+            height:100px;
+            margin-top:520px;
+            position: absolute;
+            top:200px;
+        }
+        .layui-form-item{
+            float:left;
+        }
+
+        .content{
+            overflow:auto;
+            height:600px;
+            width:1000px;
+            padding-left: 10px;
+        }
+        .li{
+            background-color: #f9f9f9;
+            width:200px;
+            height:100px;
+            margin:10px 10px;
+            padding:10px;
+            box-shadow: 5px 8px #dadada;
+            text-align: center;
+            line-height: 100px;
+            font-size: 20px;
+            overflow:hidden;
+            float: left;
+        }
+        button{
+            width:100%;
+        }
+
+    </style>
+</head>
+<body>
+<div class="login-main">
+    <header class="layui-elip">聊天房间室</header>
+    <div class="content">
+        {{ range $i,$v :=  . }}
+        <a href="/user/room?room_id= {{ $i }}&room_name={{$v}}" target = "_blank"><div class="li">{{$v}}</div></a>
+        {{end}}
+    </div>
+    <div class="bottom">
+        <button lay-submit lay-filter="login" class="layui-btn" onclick="add()">新建聊天室</button>
+    </div>
+
+</div>
+</body>
+<script type="text/javascript" src="/assets/js/jquery.js"></script>
+<script type="text/javascript" src="/assets/layui/layui.js"></script>
+<script type="text/javascript">
+    function add(){
+        layui.use('layer',function () {
+            layer.prompt({title: '输入房间名称，并确认', formType: 3,maxlength: 30}, function(pass, index){
+                if(!pass){
+                    layer.msg('房间名称不能为空！');
+                }
+                $.ajax({
+                    url:'/user/room/add',
+                    type:'post',
+                    data:{'name':pass},
+                    success:function(da){
+                        layer.close(index);
+                        location.reload();
+                        window.open('/user/room/?room_id='+da['room_id']+'&room_name='+da['room_name']);
+                    },
+                    complete: function () {
+                        layer.close(index);
+                    },
+                });
+
+
+            });
+        });
+    }
+</script>
+</html>
