@@ -10,8 +10,10 @@ import (
 
 func LoginIndex(c *marry.Context) {
 	cookie := c.GetCookie("token")
-	if cookie != nil {
-		http.Redirect(c.W,c.R,"/user/index",http.StatusFound)
+	if cookie != nil  {
+		if _,b := lib.JwtDecode(cookie.Value); b {
+			http.Redirect(c.W,c.R,"/user/index",http.StatusFound)
+		}
 	}
 	c.HTML(http.StatusOK,"login.html",nil)
 }
