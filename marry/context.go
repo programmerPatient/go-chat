@@ -69,6 +69,23 @@ func (c *Context) GetHeader(key string) string {
 	return c.R.Header.Get(key)
 }
 
+func (c *Context) DelCookie(key string) {
+	http.SetCookie(c.W,&http.Cookie{
+		Name:       key,
+		Value:      "",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Time{},
+		RawExpires: "",
+		MaxAge:     -1,
+		Secure:     false,
+		HttpOnly:   false,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	})
+}
+
 /**
 设置cookie
  */

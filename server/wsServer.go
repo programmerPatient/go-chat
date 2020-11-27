@@ -33,16 +33,16 @@ func wsHandler(ws *websocket.Conn) {
 	for {
 		var reply string
 		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			roomLogic.Clear(roomLogic.WsAcc[ws])
+			roomLogic.Clear(ws,roomLogic.WsAcc[ws])
 			break
 		}else{
 			//消息转发
-			newData := &roomLogic.RoomData{
+			nowData := &roomLogic.RoomData{
 				MessType: 0,
 				Data:     nil,
 			}
-			_ = json.Unmarshal([]byte(reply), newData)
-			roomLogic.OnReceive(ws,newData)
+			_ = json.Unmarshal([]byte(reply),nowData)
+			roomLogic.OnReceive(ws,nowData)
 		}
 	}
 

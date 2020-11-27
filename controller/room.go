@@ -2,6 +2,7 @@ package controller
 
 import (
 	"../common/database/redis"
+	"../common/lib"
 	"../marry"
 	"fmt"
 	"github.com/chilts/sid"
@@ -13,7 +14,7 @@ func RoomIndex(c *marry.Context) {
 	roomId := c.Query("room_id")
 	roomName := c.Query("room_name")
 	cookie := c.GetCookie("token")
-	account := redis.GetHash("token",cookie.Value)
+	account ,_:= lib.JwtDecode(cookie.Value)
 	val := make(map[interface{}]interface{})
 	val["roomId"] = roomId
 	val["roomName"] = roomName

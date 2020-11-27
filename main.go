@@ -2,6 +2,7 @@ package main
 
 import (
 	"./common/database/redis"
+	"./config"
 	"./marry"
 	"./router"
 	"./server"
@@ -29,7 +30,8 @@ func main() {
 	})
 	engine.LoadHTMLGlob("./chat/templates/*")
 	router.Run(engine)
-	err := engine.Run(":9998")
+	addr := config.ListenIp+":"+config.Port
+	err := engine.Run(addr)
 	if err !=  nil {
 		fmt.Println(err)
 	}

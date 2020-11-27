@@ -1,76 +1,53 @@
 package lib
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"fmt"
-	jwt "github.com/dgrijalva/jwt-go"
+	"../../config"
+	"encoding/json"
 	"time"
 )
 
-var jwtKey ,_= ecdsa.GenerateKey(elliptic.P256(),rand.Reader)
+//var jwtKey ,_= ecdsa.GenerateKey(elliptic.P256(),rand.Reader)
 //var jwtKey = []byte("-----BEGIN PUBLIC KEY-----MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugdUWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQsHUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5Do2kQ+X5xK9cipRgEKwIDAQAB-----END PUBLIC KEY-----")
 //const (
 //	jwtKeys =  jwtKey
 //)
 
 type Jwt struct {
-	Data interface{}
-	jwt.StandardClaims
+	Data string
+	StartTime int64//开始时间
+	EndTime int64 //失效时间
 }
 
-func JwtNew(data interface{}) *Jwt{
+func JwtNew(data string) *Jwt{
+	nowTime := time.Now().Unix()
 	return &Jwt{
+		StartTime: nowTime,
+		EndTime: nowTime+config.JwtDuration,
 		Data:           data,
-		StandardClaims: jwt.StandardClaims{},
 	}
 }
 
 /**
 数据加密
  */
-func(j *Jwt) JwtEncode() (string,bool){
-	fmt.Print("机密的的key\n");
-	fmt.Printf("%v",jwtKey)
-	expireTime := time.Now().Add(7*24*time.Hour)
-	jwts := &Jwt{
-		Data:          j.Data,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expireTime.Unix(),//过期时间
-			IssuedAt:  time.Now().Unix(),//颁发时间
-			Issuer:    "127.0.0.1",//签名颁发人
-			Subject:   "用户信息存贮",//签名主题
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256,jwts)
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		fmt.Printf("生成令牌出粗")
-		fmt.Println(err)
-		return "",false
-	}
-	return tokenString,true
+func JwtEncode(data string) (string){
+	jwts := JwtNew(data)
+	str ,_:= json.Marshal(jwts)
+	token := EnCryption(string(str))
+	return token
 }
 
 /**
 数据解密
  */
-func JwtDecode(data string) (interface{},bool){
-	if data == "" {
-		return "令牌不可为空",false
+func JwtDecode(data string) (string,bool){
+	jwt := &Jwt{}
+	nowStr := DeCryption(data)
+	_ =json.Unmarshal([]byte(nowStr),jwt)
+	if jwt.EndTime < time.Now().Unix() {
+		return jwt.Data,false
 	}
-	claims := &Jwt{}
-	token , err := jwt.ParseWithClaims(data,claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey,nil
-	})
-	if token != nil {
-		if claims ,ok := token.Claims.(*Jwt);ok&&token.Valid{
-			return claims,true
-		}
-	}
-	fmt.Printf("%v",err)
-	return "令牌有误",false
+	return jwt.Data,true
 }
 
 

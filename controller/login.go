@@ -4,6 +4,7 @@ import (
 	"../common/database/redis"
 	"../common/lib"
 	"../marry"
+	"fmt"
 	"net/http"
 )
 
@@ -35,15 +36,9 @@ func LoginCheck(c *marry.Context) {
 		http.Redirect(c.W,c.R,"/login?error="+errs,http.StatusFound)
 		return
 	}else{
-		jwt := lib.JwtNew(account)
-		res,err := jwt.JwtEncode()
-		if !err {
-			errs += "内部服务错误请重试"
-			http.Redirect(c.W,c.R,"/login?error="+errs,http.StatusFound)
-			return
-		}
-		redis.SetHash("token",res,account)
-		c.SetCookie("token",res)
+		ress := lib.JwtEncode(account)
+		fmt.Println(ress)
+		c.SetCookie("token",ress)
 	}
 	http.Redirect(c.W,c.R,"/user/index",http.StatusFound)
 }

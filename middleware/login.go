@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"../common/database/redis"
+	"../common/lib"
 	"../marry"
 	"net/http"
 )
@@ -14,16 +15,18 @@ func LoginAuth () marry.HandlerFunc {
 		defer redis.Release()
 		var errs = ""
 		cookie := c.GetCookie("token")
-		if cookie==nil {
+		if cookie == nil {
 			errs += "请登录"
 			http.Redirect(c.W,c.R,"/login?error="+errs,http.StatusFound)
 		}
 		token := cookie.Value
-		account := redis.GetHash("token",token)
-		if account == "" {
-			errs += "请重新登录"
+		_,b := lib.JwtDecode(token)
+		if !b {
+			c.DelCookie("token")
+			errs += "令牌过期或无效，请重新登陆！"
 			http.Redirect(c.W,c.R,"/login?error="+errs,http.StatusFound)
 		}
+
 	}
 }
 

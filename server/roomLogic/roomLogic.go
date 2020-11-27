@@ -8,42 +8,57 @@ import (
 	"strings"
 )
 
-var rooms map[string]*Room
 
-var WsAcc map[*websocket.Conn]string
+var rooms = make(map[string]*Room)
 
-var accWs map[string]*websocket.Conn
+var WsAcc = make(map[*websocket.Conn]string)
 
-var userToRoom map[string]string
+ var accWs = make(map[string]*websocket.Conn)
 
+var userToRoom = make(map[string]string)
 
+//处理客户端消息
+func OnReceive(ws *websocket.Conn,newData *RoomData){
+	switch newData.MessType {
+	//心跳检测
+	case 100:
+		return
+	//初始化房间信息
+	case 102:
+		initRoom(ws ,newData.Data)
+	//聊天
+	case 104:
+		chat(newData.Data)
+	default:
+	}
+}
 
+/**
+初始化房间信息
+ */
 func initRoom(ws *websocket.Conn,data map[string]string){
 	redis := redis.Pool.Get()
 	defer redis.Release()
 	roomId := strings.Replace(data["roomId"], " ", "", -1)
 	account := strings.Replace(data["account"], " ", "", -1)
-	if userToRoom == nil {
-		userToRoom = make(map[string]string)
-	}
-	userToRoom[account] = roomId
-	if accWs== nil {
-		accWs = make(map[string]*websocket.Conn)
-	}
-	if WsAcc== nil {
-		WsAcc = make(map[*websocket.Conn]string)
-	}
-	if rooms== nil {
-		rooms = make(map[string]*Room)
-	}
-	if accWs[account] != nil {
-		accWs[account].Close()
-	}
+	/**
+	关闭老连接，异地登录
+	 */
+	oldWs := accWs[account]
 	accWs[account] = ws
+	delete(WsAcc,oldWs)
 	WsAcc[ws] = account
+	if oldWs != nil {
+		oldWs.Close()
+	}
 	if rooms[roomId] == nil {
 		rooms[roomId] = NewRoom()
 	}
+	if userToRoom[account] != "" && userToRoom[account] != roomId {
+		rooms[userToRoom[account]].Pop(account)
+		go offine(account,userToRoom[account])
+	}
+	userToRoom[account] = roomId
 	rooms[roomId].Push(account)
 	re := redis.GetHash("room:all",roomId)
 	nickname := redis.GetHash("user:"+account,"name")
@@ -102,26 +117,12 @@ func sendMessageToClient(ws map[string]*websocket.Conn,data interface{}){
 	}()
 }
 
-//处理客户端消息
-func OnReceive(ws *websocket.Conn,newData *RoomData){
-	switch newData.MessType {
-	//心跳检测
-	case 100:
-		return
-	//初始化房间信息
-	case 102:
-		initRoom(ws ,newData.Data)
-	//聊天
-	case 104:
-		chat(ws,newData.Data)
-	default:
-	}
-}
+
 
 /**
 聊天
 */
-func chat(ws *websocket.Conn,data map[string]string){
+func chat(data map[string]string){
 	roomId := strings.Replace(data["roomId"], " ", "", -1)
 	account := strings.Replace(data["account"]," ","",-1)
 	toAccount := strings.Replace(data["toUid"]," ","",-1)
@@ -146,12 +147,11 @@ func chat(ws *websocket.Conn,data map[string]string){
 /**
 下线
 */
-func offine(account string){
+func offine(account string,roomId string){
 	redis := redis.Pool.Get()
 	defer redis.Release()
 	nickname := redis.GetHash("user:"+account,"name")
 	message := "用户"+nickname+"下线了！"
-	roomId := userToRoom[account]
 	wss := rooms[roomId].GetPeople()
 	newDatas,newWss := getWsAndNameByacc(wss)
 	datas := make(map[string]interface{})
@@ -165,10 +165,12 @@ func offine(account string){
 /**
 清理信息
 */
-func Clear(account string) {
-	roomId := userToRoom[account]
-	room := rooms[roomId]
-	room.Pop(account)
-	offine(account)
+func Clear(ws *websocket.Conn,account string) {
+	if WsAcc[ws] != "" {
+		roomId := userToRoom[account]
+		room := rooms[roomId]
+		room.Pop(account)
+		offine(account,roomId)
+	}
 }
 
