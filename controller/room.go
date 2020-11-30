@@ -20,6 +20,7 @@ func RoomIndex(c *marry.Context) {
 	val["roomName"] = roomName
 	val["account"] = account
 	val["accountName"] = redis.GetHash("user:"+account,"name")
+	fmt.Println(val)
 	c.HTML(http.StatusOK,"room.html",val)
 }
 
