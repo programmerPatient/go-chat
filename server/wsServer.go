@@ -55,5 +55,4 @@ func (w *WsServer) Start()  {
 	if err != nil {
 		fmt.Println(err)
 	}
-
 }

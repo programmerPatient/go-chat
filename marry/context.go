@@ -80,7 +80,6 @@ func (c *Context) DelCookie(key string) {
 		MaxAge:     -1,
 		Secure:     false,
 		HttpOnly:   false,
-		SameSite:   0,
 		Raw:        "",
 		Unparsed:   nil,
 	})
@@ -100,7 +99,6 @@ func (c *Context) SetCookie(key string,value string){
 		MaxAge:     0,
 		Secure:     false,
 		HttpOnly:   false,
-		SameSite:   0,
 		Raw:        "",
 		Unparsed:   nil,
 	})

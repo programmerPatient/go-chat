@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-//var jwtKey ,_= ecdsa.GenerateKey(elliptic.P256(),rand.Reader)
-//var jwtKey = []byte("-----BEGIN PUBLIC KEY-----MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugdUWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQsHUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5Do2kQ+X5xK9cipRgEKwIDAQAB-----END PUBLIC KEY-----")
-//const (
-//	jwtKeys =  jwtKey
-//)
 
 type Jwt struct {
 	Data string
