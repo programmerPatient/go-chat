@@ -155,7 +155,7 @@
     var roomId = {{.roomId}};
     var account = {{.account}};
     var name = {{.accountName}};
-    const socket = new WebSocket("ws://127.0.0.1:9501");
+    const socket = new WebSocket("ws://maliweb.top:9501");
 
     socket.onopen = function(event){
         socket.send(JSON.stringify({
