@@ -6,5 +6,5 @@ const (
 	Port = "9998"
 
 	//令牌有效时间
-	JwtDuration = 600
+	JwtDuration = 60*60*2
 )
