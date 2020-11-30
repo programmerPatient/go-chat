@@ -4,6 +4,7 @@ import (
 	"../common/database/redis"
 	"../common/lib"
 	"../marry"
+	"fmt"
 	"net/http"
 )
 
@@ -30,7 +31,9 @@ func RegisterCheck(c *marry.Context) {
 		errs += "密码不一致"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
 	}
+	fmt.Println(account,name,password)
 	res := redis.HGetAll("user:"+account)
+	fmt.Println(res)
 	if res != nil {
 		errs += "账号已经存在"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
