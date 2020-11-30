@@ -24,11 +24,11 @@ func main() {
 	}()
 	engine := marry.New()
 	//静态访问路径
-	engine.Static("/assets","./chat/static")
+	engine.Static("/assets","./static")
 	engine.SetFuncMap(template.FuncMap{
 		"FormatAsData":FormatAsData,
 	})
-	engine.LoadHTMLGlob("./chat/templates/*")
+	engine.LoadHTMLGlob("./templates/*")
 	router.Run(engine)
 	addr := config.ListenIp+":"+config.Port
 	err := engine.Run(addr)
