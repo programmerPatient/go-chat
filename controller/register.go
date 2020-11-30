@@ -21,30 +21,25 @@ func RegisterIndex(c *marry.Context) {
 
 func RegisterCheck(c *marry.Context) {
 	redis := redis.Pool.Get()
-	fmt.Printf("%v",redis)
 	defer redis.Release()
 	account := c.PostForm("account")
 	name := c.PostForm("name")
 	password := c.PostForm("password")
-	fmt.Println(account,name,password)
 	confimPassword := c.PostForm("confim_password")
 	var errs string
 	if password != confimPassword {
 		errs += "密码不一致"
-		http.RedirectHandler("/register?error="+errs,http.StatusFound)//重定向
+		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
 	}
-	fmt.Printf(account,name,password,confimPassword)
 	res := redis.HGetAll("user:"+account)
-	fmt.Printf("%v",res)
 	if res != nil {
 		errs += "账号已经存在"
-		http.RedirectHandler("/register?error="+errs,http.StatusFound)//重定向
+		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
 	}
 	res = redis.GetHash("user:name",name)
-	fmt.Printf("%v",res)
-	if res != nil {
+	if res != "" {
 		errs += "用户名已经存在"
-		http.RedirectHandler("/register?error="+errs,http.StatusFound)//重定向
+		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
 	}
 	redis.SetHash("user:name",name,account)
 	redis.SetHash("user:"+account,"name",name)
