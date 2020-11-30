@@ -4,7 +4,6 @@ import (
 	"../common/database/redis"
 	"../common/lib"
 	"../marry"
-	"fmt"
 	"net/http"
 )
 
