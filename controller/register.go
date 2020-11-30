@@ -34,7 +34,7 @@ func RegisterCheck(c *marry.Context) {
 	fmt.Println(account,name,password)
 	res := redis.HGetAll("user:"+account)
 	fmt.Println(res)
-	if res != nil {
+	if res != nil  {
 		errs += "账号已经存在"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
 	}
@@ -48,7 +48,8 @@ func RegisterCheck(c *marry.Context) {
 	redis.SetHash("user:"+account,"account",account)
 	has := lib.MD5(password)
 	redis.SetHash("user:"+account,"password",has)
-
+	ress := lib.JwtEncode(account)
+	c.SetCookie("token",ress)
 	http.Redirect(c.W,c.R,"/user/index",http.StatusFound)
 }
 

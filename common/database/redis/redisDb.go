@@ -53,7 +53,6 @@ func (r *RedisDb) GetHash(key string,field string) string {
 func (r *RedisDb) HGetAll(key string) interface{} {
 	value , err := redis.StringMap(r.C.Do("HGetAll",key))
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 	return value
