@@ -50,7 +50,7 @@ func (r *RedisDb) GetHash(key string,field string) string {
 	}
 	return value
 }
-func (r *RedisDb) HGetAll(key string) interface{} {
+func (r *RedisDb) HGetAll(key string) map[string]string {
 	value , err := redis.StringMap(r.C.Do("HGetAll",key))
 	if err != nil {
 		return nil

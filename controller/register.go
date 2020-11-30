@@ -4,7 +4,6 @@ import (
 	"../common/database/redis"
 	"../common/lib"
 	"../marry"
-	"fmt"
 	"net/http"
 )
 
@@ -30,26 +29,27 @@ func RegisterCheck(c *marry.Context) {
 	if password != confimPassword {
 		errs += "密码不一致"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
+		return
 	}
-	fmt.Println(account,name,password)
 	res := redis.HGetAll("user:"+account)
-	fmt.Println(res)
-	if res != nil  {
+	if  len(res) > 0  {
 		errs += "账号已经存在"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
+		return
 	}
-	res = redis.GetHash("user:name",name)
-	if res != "" {
+	ress := redis.GetHash("user:name",name)
+	if ress != "" {
 		errs += "用户名已经存在"
 		http.Redirect(c.W,c.R,"/register?error="+errs,http.StatusFound)//重定向
+		return
 	}
 	redis.SetHash("user:name",name,account)
 	redis.SetHash("user:"+account,"name",name)
 	redis.SetHash("user:"+account,"account",account)
 	has := lib.MD5(password)
 	redis.SetHash("user:"+account,"password",has)
-	ress := lib.JwtEncode(account)
-	c.SetCookie("token",ress)
+	resss := lib.JwtEncode(account)
+	c.SetCookie("token",resss)
 	http.Redirect(c.W,c.R,"/user/index",http.StatusFound)
 }
 
