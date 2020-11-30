@@ -21,11 +21,12 @@ func RegisterIndex(c *marry.Context) {
 
 func RegisterCheck(c *marry.Context) {
 	redis := redis.Pool.Get()
+	fmt.Printf("%v",redis)
 	defer redis.Release()
 	account := c.PostForm("account")
 	name := c.PostForm("name")
 	password := c.PostForm("password")
-
+	fmt.Println(account,name,password)
 	confimPassword := c.PostForm("confim_password")
 	var errs string
 	if password != confimPassword {
