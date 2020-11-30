@@ -21,9 +21,10 @@ func New() *RedisPool {
 	min,_ :=strconv.Atoi(config.RedisConf["minCount"])
 	addr := config.RedisConf["host"]+":"+config.RedisConf["port"]
 	setPasswd := redis.DialPassword(config.RedisConf["password"])
+	setdb := redis.DialDatabase(1)    // 设置db
 	pool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp",addr,setPasswd)
+			return redis.Dial("tcp",addr,setdb,setPasswd)
 		},
 		MaxIdle:         min,
 		MaxActive:       max,
